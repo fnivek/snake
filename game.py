@@ -25,17 +25,18 @@ def invert_color(c):
     return 255 - c 
 
 def step_x(x):
-    x = x + update_rate * 1 * step
+    x = x + update_rate * 25.87654 * step
     if x > width:
         x = 0
     return x
 
 def step_y(y):
-    y = y - update_rate * 1 * step
+    y = y - update_rate * 10.867 * step
     if y < 0:
         y = height
     return y
     
+mx, my = 0, 0
 
 # Infinite loop
 while True:
@@ -48,6 +49,8 @@ while True:
     event = pygame.event.poll()
     if event.type == pygame.QUIT:
         break
+    elif event.type == pygame.MOUSEMOTION:
+        mx, my = event.pos
 
     # Logic
     x_line = map(step_x, x_line)
@@ -61,5 +64,5 @@ while True:
 
     screen.fill(color)
     for l in zip(x_line, y_line):
-        pygame.draw.line(screen, map(invert_color, color), (10, l[1]), (l[0], height - 10))
+        pygame.draw.line(screen, map(invert_color, color), (mx, l[1]), (l[0], my))
     pygame.display.flip()
