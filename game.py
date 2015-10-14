@@ -11,9 +11,14 @@ height = 640
 num_lines = 10
 y_line = [height - (height * i / num_lines) for i in range(num_lines)]
 x_line = [width * i / num_lines for i in range(num_lines)]
+mx, my = 0, 0
+running = True
 
 # Initilize a surface
 screen = pygame.display.set_mode((width, height))
+
+# Initilize a clock
+clock = pygame.time.Clock()
 
 def wrap_color(c):
     if c >= 256:
@@ -36,21 +41,25 @@ def step_y(y):
         y = height
     return y
     
-mx, my = 0, 0
+
 
 # Infinite loop
-while True:
+while running:
     # Time stuff
     now = time.time()
     step = now - last_time
     last_time = now
 
     # Event handling
-    event = pygame.event.poll()
-    if event.type == pygame.QUIT:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            break
+        elif event.type == pygame.MOUSEMOTION:
+            mx, my = event.pos
+
+    if not running:
         break
-    elif event.type == pygame.MOUSEMOTION:
-        mx, my = event.pos
 
     # Logic
     x_line = map(step_x, x_line)
@@ -66,3 +75,6 @@ while True:
     for l in zip(x_line, y_line):
         pygame.draw.line(screen, map(invert_color, color), (mx, l[1]), (l[0], my))
     pygame.display.flip()
+
+    # Sleep 1/24 of a second
+    clock.tick(24)
