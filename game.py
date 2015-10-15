@@ -1,6 +1,41 @@
 #! /usr/bin/env python
 
 import pygame
+import random
+
+# Globals
+kBackCol = (0, 0, 0)
+kFoodCol = (0, 255, 0)
+kSnakeCol = (255, 255, 255)
+# Dimensions
+width = 640
+height = 640
+
+class Food:
+    """ This is food """
+
+    def __init__(self, surface):
+        self.surface = surface
+        self.col = kFoodCol
+        self.width = 10
+        self.height = 10
+        self.place()        
+
+    def place(self):
+        x = random.randint(0, width - 1)
+        y = random.randint(0, height - 1)
+
+        while self.surface.get_at((x, y)) is kSnakeCol:
+            x = random.randint(0, width - 1)
+            y = random.randint(0, height - 1)
+
+        self.x = x
+        self.y = y
+
+    def draw(self):
+        for x in xrange(self.x - self.width / 2, self.x + self.width / 2):
+            for y in xrange(self.y - self.height / 2, self.y + self.width / 2):
+                self.surface.set_at((x, y), self.col)
 
 class Worm:
     """ This be my worm!"""
@@ -15,6 +50,9 @@ class Worm:
         self.body = []
         self.crashed = False
         self.lifetime = 0
+        self.col = kSnakeCol
+        self.width = 5
+        self.height = 5
 
     def key_event(self, event):
         """ Handle keyboard events """
@@ -35,12 +73,13 @@ class Worm:
         self.x += self.dir_x
         self.y += self.dir_y
 
-        if (self.x, self.y) in self.body:
+        col = self.surface.get_at((self.x, self.y))[:3]
+
+        if col == self.col:
             self.crashed = True
-        else:
-            self.lifetime += 1
-            if not (self.lifetime % 10):
-                self.length += 1
+        elif col == kFoodCol:
+            f.place()
+            self.length += 10
 
         self.body.insert(0, (self.x, self.y))
 
@@ -49,12 +88,10 @@ class Worm:
 
     def draw(self):
         for x, y in self.body:
-            self.surface.set_at((x, y), (255, 255, 255))
+            for x2 in xrange(x - self.width / 2, x + self.width / 2):
+                for y2 in xrange(y - self.height / 2, y + self.width / 2):
+                    self.surface.set_at((x2, y2), self.col)
 
-
-# Dimensions
-width = 640
-height = 640
 
 screen = pygame.display.set_mode((width, height))
 clock = pygame.time.Clock()
@@ -62,10 +99,12 @@ running = True
 
 # Our worm
 w = Worm(screen, width / 2, height / 2, 50)
+f = Food(screen)
 
 # Main loop
 while running:
     screen.fill((0, 0, 0))
+    f.draw()
     w.move()
     w.draw()
 
